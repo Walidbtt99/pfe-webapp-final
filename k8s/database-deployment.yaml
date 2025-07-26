@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: actia-database
+  namespace: actia-engineering
+  labels:
+    app: actia-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: actia-database
+  template:
+    metadata:
+      labels:
+        app: actia-database
+    spec:
+      containers:
+      - name: postgres
+        image: actia-database:latest
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "actia_db"
+        - name: POSTGRES_USER
+          value: "actia_user"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: actia-db-secret
+              key: password
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - actia_user
+            - -d
+            - actia_db
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - actia_user
+            - -d
+            - actia_db
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: actia-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: actia-database-service
+  namespace: actia-engineering
+spec:
+  selector:
+    app: actia-database
+  ports:
+  - port: 5432
+    targetPort: 5432
+  type: ClusterIP

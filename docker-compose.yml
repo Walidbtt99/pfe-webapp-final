@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Database
+  database:
+    build:
+      context: .
+      dockerfile: database.Dockerfile
+    container_name: actia-database
+    environment:
+      POSTGRES_DB: actia_db
+      POSTGRES_USER: actia_user
+      POSTGRES_PASSWORD: actia_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - actia-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U actia_user -d actia_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Frontend (includes API routes)
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    container_name: actia-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://actia_user:actia_password@database:5432/actia_db
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - actia-network
+
+volumes:
+  postgres_data:
+
+networks:
+  actia-network:
+    driver: bridge
