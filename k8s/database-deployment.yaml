@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: postgres
-        image: actia-database:latest
+        image: bettaibiwalid/pfe-webapp-final-database:1.0.0
         ports:
         - containerPort: 5432
         env:

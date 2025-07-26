@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: actia-frontend:latest
+        image: bettaibiwalid/pfe-webapp-final-frontend:1.0.0
         ports:
         - containerPort: 3000
         env:
