@@ -3,7 +3,13 @@ FROM node:18-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache \
+  libc6-compat \
+  python3 \
+  make \
+  g++ \
+  postgresql-dev && \
+  ln -sf python3 /usr/bin/python
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
