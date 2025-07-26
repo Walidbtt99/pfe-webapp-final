@@ -59,4 +59,5 @@ spec:
   ports:
   - port: 80
     targetPort: 3000
-  type: LoadBalancer
+    nodePort: 32000
+  type: NodePort
